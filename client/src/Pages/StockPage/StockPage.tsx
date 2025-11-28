@@ -4,10 +4,16 @@ import { Article } from "../../helpers/declarations";
 import AddArticleModal, {
   AddArticleDto,
 } from "../../Components/AddArticleModal/AddArticleModal";
+import EditArticleModal from "../../Components/EditArticleModal/EditArticleModal";
 import SuccessDialog from "../../Components/SuccessDialog/SuccessDialog";
 import ErrorDialog from "../../Components/ErrorDialog/ErrorDialog";
 import TableSkeleton from "../../Components/TableSkeleton/TableSkeleton";
-import { AllArticles, CreateArticle } from "../../Services/ArticleService";
+import {
+  AllArticles,
+  CreateArticle,
+  UpdateArticle,
+  DeleteArticle,
+} from "../../Services/ArticleService";
 import { showErrorModal, showSuccessModal } from "../../helpers/handlers";
 import { useAuth } from "../../Contexts/useAuth";
 import SideNav from "../../Components/SideNav/SideNav";
@@ -17,6 +23,8 @@ type Props = {};
 
 const StockPage = (props: Props) => {
   const [isModalOpen, setModalOpen] = useState<boolean>(false);
+  const [isEditModalOpen, setEditModalOpen] = useState<boolean>(false);
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [articles, setArticles] = useState<Article[]>([]);
   const [isLoading, setLoading] = useState<boolean>(true);
   const { isLoggedIn } = useAuth();
@@ -35,25 +43,73 @@ const StockPage = (props: Props) => {
     if (addArticleDto) {
       console.log(addArticleDto);
       try {
-        const reponse = await CreateArticle(addArticleDto);
-        if (reponse) {
-          setArticles([...articles, reponse]);
+        const response = await CreateArticle(addArticleDto);
+        if (response) {
+          setArticles([...articles, response]);
           showSuccessModal();
         } else {
           showErrorModal();
         }
       } catch (error) {
-        console.log(error);
         showErrorModal();
       }
-    } else {
-      console.log("no article data");
     }
   };
+
+  const CloseEditModal = async (article?: Article) => {
+    setEditModalOpen(false);
+    if (article) {
+      try {
+        const updateDto = {
+          name: article.name,
+          description: article.description,
+          quantity: article.quantity,
+          price: article.price,
+          categoryId: article.category?.id || 0,
+          supplierId: article.supplier?.id || 0,
+          barcode: article.barcode,
+        };
+        const response = await UpdateArticle(article.id, updateDto);
+        if (response) {
+          setArticles(
+            articles.map((a) => (a.id === article.id ? response : a))
+          );
+          showSuccessModal();
+        } else {
+          showErrorModal();
+        }
+      } catch (error) {
+        showErrorModal();
+      }
+    }
+  };
+
+  const handleEdit = (article: Article) => {
+    setSelectedArticle(article);
+    setEditModalOpen(true);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (window.confirm("Are you sure you want to delete this article?")) {
+      try {
+        const result = await DeleteArticle(id);
+        if (result.success) {
+          setArticles(articles.filter((a) => a.id !== id));
+          showSuccessModal();
+        } else {
+          alert(result.message || "Failed to delete article");
+          showErrorModal();
+        }
+      } catch (error) {
+        showErrorModal();
+      }
+    }
+  };
+
   return (
     <div className={`w-full m-0 bg-[#171717] ${isLoggedIn() ? "ps-0" : "p-0"}`}>
-      {isLoggedIn() ? <SideNav/>: <></>}
-      <NavBar/>
+      {isLoggedIn() ? <SideNav /> : <></>}
+      <NavBar />
       <div className="pt-36 px-2">
         <div className="flex justify-end py-4 container mx-auto">
           <button
@@ -68,13 +124,22 @@ const StockPage = (props: Props) => {
         {isLoading ? (
           <TableSkeleton isLoading={isLoading}></TableSkeleton>
         ) : (
-          <ArticleTable articles={articles}></ArticleTable>
+          <ArticleTable
+            articles={articles}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          ></ArticleTable>
         )}
       </div>
       <AddArticleModal
         isOpen={isModalOpen}
         onClose={CloseModal}
       ></AddArticleModal>
+      <EditArticleModal
+        isOpen={isEditModalOpen}
+        onClose={CloseEditModal}
+        article={selectedArticle}
+      ></EditArticleModal>
       {/* {showSuccess && <SuccessDialog onClose={() => setShowSuccess(false)} />}
       {showError && <ErrorDialog onClose={() => setShowError(false)} />} */}
     </div>

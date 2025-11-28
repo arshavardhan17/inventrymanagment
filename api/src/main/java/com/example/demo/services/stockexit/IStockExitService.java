@@ -16,4 +16,6 @@ public interface IStockExitService {
     List<StockExit> getAllStockExit();
 
     StockExit updateStockExit(UpdateStockExitDto updateStockExitDto, Long id);
+
+    void deleteStockExit(Long id);
 }

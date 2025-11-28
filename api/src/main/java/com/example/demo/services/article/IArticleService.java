@@ -8,8 +8,14 @@ import java.util.List;
 
 public interface IArticleService {
     Article createArticle(CreateArticleDto createArticleDto);
+
     Article updateArticle(UpdateArticleDto updateArticleDto, Long id);
+
     List<Article> getAllArticles();
+
     List<Article> getAllArticlesByCategory(Long id);
+
     List<Article> getAllArticlesBySupplier(Long id);
+
+    void deleteArticle(Long id);
 }

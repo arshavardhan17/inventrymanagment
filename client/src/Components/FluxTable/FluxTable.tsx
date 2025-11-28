@@ -5,9 +5,11 @@ import EditStockModal from "../EditStockModal/EditStockModal";
 
 interface Props {
   iOStock: IOStock[];
+  onDelete?: (id: number, type: string) => void;
+  onEditComplete?: () => void;
 }
 
-const FluxTable = ({ iOStock }: Props) => {
+const FluxTable = ({ iOStock, onDelete, onEditComplete }: Props) => {
   const [selectedStock, setSelectedStock] = useState<IOStock | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [stocks, setStocks] = useState<IOStock[]>(iOStock);
@@ -17,9 +19,20 @@ const FluxTable = ({ iOStock }: Props) => {
     setIsModalOpen(true);
   };
 
+  const handleDeleteClick = (id: number, type: string) => {
+    if (window.confirm(`Are you sure you want to delete this ${type}?`)) {
+      if (onDelete) {
+        onDelete(id, type);
+      }
+    }
+  };
+
   const handleModalClose = () => {
     setIsModalOpen(false);
     setSelectedStock(null);
+    if (onEditComplete) {
+      onEditComplete();
+    }
   };
 
   const handleSave = (updatedStock: IOStock) => {
@@ -40,9 +53,10 @@ const FluxTable = ({ iOStock }: Props) => {
               <th className="px-6 py-3 text-black">Article</th>
               <th className="px-6 py-3 text-black">
                 {/* Change header based on most common type */}
-                {stocks.filter(s => s.type === "Exit").length > 
-                 stocks.filter(s => s.type === "Entry").length 
-                 ? "Destination" : "Intervenant"}
+                {stocks.filter((s) => s.type === "Exit").length >
+                stocks.filter((s) => s.type === "Entry").length
+                  ? "Destination"
+                  : "Intervenant"}
               </th>
               <th className="px-6 py-3">Quantity</th>
               <th className="px-6 py-3">Action</th>
@@ -50,22 +64,43 @@ const FluxTable = ({ iOStock }: Props) => {
           </thead>
           <tbody>
             {stocks.map((operation) => (
-              <tr key={operation.id} className="bg-gradient-to-r from-[#08D6DA] to-[#9DF8FA] border-none dark:bg-gray-900 dark:border-gray-700">
+              <tr
+                key={operation.id}
+                className="bg-gradient-to-r from-[#08D6DA] to-[#9DF8FA] border-none dark:bg-gray-900 dark:border-gray-700"
+              >
                 <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
-                  <span className={`px-2 py-1 rounded-full text-xs font-semibold ${operation.type === "Entry" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                      operation.type === "Entry"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }`}
+                  >
                     {operation.type}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-black">{formatDate(operation.date.toString())}</td>
+                <td className="px-6 py-4 text-black">
+                  {formatDate(operation.date.toString())}
+                </td>
                 <td className="px-6 py-4 text-black">{operation.article}</td>
-                <td className="px-6 py-4 text-black">{operation.intervenant || "N/A"}</td>
+                <td className="px-6 py-4 text-black">
+                  {operation.intervenant || "N/A"}
+                </td>
                 <td className="px-6 py-4 text-black">{operation.quantity}</td>
                 <td className="px-6 py-4 text-black">
                   <span
                     onClick={() => handleEditClick(operation)}
-                    className="text-blue-600 hover:underline cursor-pointer"
+                    className="text-blue-600 hover:underline cursor-pointer mr-3"
                   >
                     Edit
+                  </span>
+                  <span
+                    onClick={() =>
+                      handleDeleteClick(operation.id, operation.type)
+                    }
+                    className="text-red-600 hover:underline cursor-pointer"
+                  >
+                    Delete
                   </span>
                 </td>
               </tr>

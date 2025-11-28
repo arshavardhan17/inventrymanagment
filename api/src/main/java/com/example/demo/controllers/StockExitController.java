@@ -3,6 +3,7 @@ package com.example.demo.controllers;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -50,5 +51,15 @@ public class StockExitController {
     @GetMapping("GetAllStockExit")
     public ResponseEntity<List<StockExit>> getAllStockExit() {
         return ResponseEntity.ok(stockExitService.getAllStockExit());
+    }
+
+    @DeleteMapping("DeleteStockExit/{id}")
+    public ResponseEntity<?> deleteStockExit(@PathVariable("id") Long id) {
+        try {
+            stockExitService.deleteStockExit(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

@@ -1,10 +1,38 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../../Contexts/useAuth";
+import { GetCurrentUser, UserDto } from "../../Services/ProfileService";
+import ProfileModal from "../ProfileModal/ProfileModal";
 
 type Props = {};
 
 const NavBar = (props: Props) => {
   const { isLoggedIn, logout } = useAuth();
+  const [currentUser, setCurrentUser] = useState<UserDto | null>(null);
+  const [isProfileModalOpen, setProfileModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (isLoggedIn()) {
+      fetchCurrentUser();
+    }
+  }, [isLoggedIn]);
+
+  const fetchCurrentUser = async () => {
+    try {
+      const user = await GetCurrentUser();
+      setCurrentUser(user);
+    } catch (error) {
+      console.error("Error fetching current user:", error);
+    }
+  };
+
+  const handleProfileClick = () => {
+    setProfileModalOpen(true);
+  };
+
+  const handleProfileClose = () => {
+    setProfileModalOpen(false);
+    fetchCurrentUser(); // Refresh user data after profile update
+  };
   return (
     <div className="bg-[#171717]">
       <nav className=" border-gray-200 dark:bg-gray-900">
@@ -27,12 +55,21 @@ const NavBar = (props: Props) => {
             </span>
           </a> */}
           <div className="flex items-center space-x-6 rtl:space-x-reverse">
-            <a
-              href="tel:+91-6369269540"
-              className="text-sm  text-gray-500 dark:text-white hover:underline"
-            >
-              (+91) 6369269540
-            </a>
+            {isLoggedIn() && currentUser ? (
+              <button
+                onClick={handleProfileClick}
+                className="text-sm text-gray-500 dark:text-white hover:underline"
+              >
+                {currentUser.phone || "My Profile"}
+              </button>
+            ) : (
+              <a
+                href="tel:+91-6369269540"
+                className="text-sm  text-gray-500 dark:text-white hover:underline"
+              >
+                (+91) 6369269540
+              </a>
+            )}
             {!isLoggedIn() ? (
               <>
                 <a
@@ -62,6 +99,7 @@ const NavBar = (props: Props) => {
           </div>
         </div>
       </nav>
+      <ProfileModal isOpen={isProfileModalOpen} onClose={handleProfileClose} />
     </div>
   );
 };

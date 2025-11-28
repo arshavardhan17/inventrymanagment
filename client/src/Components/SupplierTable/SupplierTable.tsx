@@ -3,6 +3,8 @@ import { Supplier } from "../../helpers/declarations";
 
 interface Props {
   Suppliers: Supplier[];
+  onEdit: (supplier: Supplier) => void;
+  onDelete: (id: number) => void;
 }
 
 const SupplierTable = (props: Props) => {
@@ -21,9 +23,9 @@ const SupplierTable = (props: Props) => {
               <th scope="col" className="px-6 py-3">
                 phone
               </th>
-              {/* <th scope="col" className="px-6 py-3">
+              <th scope="col" className="px-6 py-3">
                 Action
-              </th> */}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -40,14 +42,20 @@ const SupplierTable = (props: Props) => {
                 </th>
                 <td className="px-6 py-4"> {Supplier.address}</td>
                 <td className="px-6 py-4"> {Supplier.phone}</td>
-                {/* <td className="px-6 py-4">
-                  <a
-                    href="#"
-                    className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                <td className="px-6 py-4">
+                  <button
+                    onClick={() => props.onEdit(Supplier)}
+                    className="font-medium text-blue-600 dark:text-blue-500 hover:underline mr-3"
                   >
                     Edit
-                  </a>
-                </td> */}
+                  </button>
+                  <button
+                    onClick={() => props.onDelete(Supplier.id)}
+                    className="font-medium text-red-600 dark:text-red-500 hover:underline"
+                  >
+                    Delete
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>

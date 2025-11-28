@@ -16,6 +16,8 @@ import {
   CreateStockEntry,
   CreateStockExit,
   GetAllIOStock,
+  DeleteStockEntry,
+  DeleteStockExit,
 } from "../../Services/IOService";
 import { showErrorModal, showSuccessModal } from "../../helpers/handlers";
 import NavBar from "../../Components/NavBar/NavBar";
@@ -61,29 +63,27 @@ const EntryExitPage = (props: Props) => {
 
     GetAllIoOperations();
   }, []);
+
+  const refreshData = async () => {
+    setLoading(true);
+    const response = await GetAllIOStock();
+    setIoStock(response);
+    setLoading(false);
+  };
   const CloseEntry = async (data?: AddStockEntryDto) => {
     try {
       setEntryModalOpen(false);
-      console.log("Data:", data); // Log data to verify its content
       if (data) {
         const reponse = await CreateStockEntry(data);
-
-        console.log("Response:", reponse); // Log response to ensure it's valid
-
         if (reponse != null) {
-          setIoStock(
-            [...ioStock, EntryToStock(reponse)].sort(
-              (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-            )
-          );
+          await refreshData();
           showSuccessModal();
         } else {
-          throw new Error("Invalid response from CreateStockEntry"); // Handle unexpected response
+          throw new Error("Invalid response from CreateStockEntry");
         }
-      } else {
       }
     } catch (error) {
-      console.error("Error:", error); // Log error to debug
+      console.error("Error:", error);
       setEntryModalOpen(false);
       showErrorModal();
     }
@@ -91,27 +91,39 @@ const EntryExitPage = (props: Props) => {
   const CloseExit = async (data?: AddStockExitDto) => {
     try {
       setExitModalOpen(false);
-      console.log("Data:", data); // Log data to verify its content
       if (data) {
         const reponse = await CreateStockExit(data);
-
-        console.log("Response:", reponse); // Log response to ensure it's valid
-
         if (reponse != null) {
-          setIoStock(
-            [...ioStock, ExitToStock(reponse)].sort(
-              (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-            )
-          );
+          await refreshData();
           showSuccessModal();
         } else {
-          throw new Error("Invalid response from CreateStockExit"); // Handle unexpected response
+          throw new Error("Invalid response from CreateStockExit");
         }
-      } else {
       }
     } catch (error) {
-      console.error("Error:", error); // Log error to debug
+      console.error("Error:", error);
       setExitModalOpen(false);
+      showErrorModal();
+    }
+  };
+
+  const handleDelete = async (id: number, type: string) => {
+    try {
+      let result;
+      if (type === "Entry") {
+        result = await DeleteStockEntry(id);
+      } else {
+        result = await DeleteStockExit(id);
+      }
+
+      if (result.success) {
+        await refreshData();
+        showSuccessModal();
+      } else {
+        alert(result.message || `Failed to delete ${type}`);
+        showErrorModal();
+      }
+    } catch (error) {
       showErrorModal();
     }
   };
@@ -142,7 +154,11 @@ const EntryExitPage = (props: Props) => {
           {isLoading ? (
             <TableSkeleton isLoading={isLoading}></TableSkeleton>
           ) : (
-            <FluxTable iOStock={ioStock}></FluxTable>
+            <FluxTable
+              iOStock={ioStock}
+              onDelete={handleDelete}
+              onEditComplete={refreshData}
+            ></FluxTable>
           )}
         </div>
       </div>

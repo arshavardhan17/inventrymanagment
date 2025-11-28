@@ -3,6 +3,8 @@ import { Article } from "../../helpers/declarations";
 
 interface Props {
   articles: Article[];
+  onEdit: (article: Article) => void;
+  onDelete: (id: number) => void;
 }
 
 const ArticleTable = (props: Props) => {
@@ -27,9 +29,9 @@ const ArticleTable = (props: Props) => {
               <th scope="col" className="px-6 py-3">
                 Quantity
               </th>
-              {/* <th scope="col" className="px-6 py-3">
+              <th scope="col" className="px-6 py-3">
                 Action
-              </th> */}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -44,18 +46,28 @@ const ArticleTable = (props: Props) => {
                 >
                   {article.name}
                 </th>
-                <td className="px-6 py-4 text-black ">{article.category?.name}</td>
-                <td className="px-6 py-4 text-black ">{article.supplier?.name}</td>
+                <td className="px-6 py-4 text-black ">
+                  {article.category?.name}
+                </td>
+                <td className="px-6 py-4 text-black ">
+                  {article.supplier?.name}
+                </td>
                 <td className="px-6 py-4 text-black ">Rs.{article.price}</td>
                 <td className="px-6 py-4 text-black ">{article.quantity}</td>
-                {/* <td className="px-6 py-4 text-black ">
-                  <a
-                    href="#"
-                    className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                <td className="px-6 py-4 text-black ">
+                  <button
+                    onClick={() => props.onEdit(article)}
+                    className="font-medium text-blue-600 dark:text-blue-500 hover:underline mr-3"
                   >
                     Edit
-                  </a>
-                </td> */}
+                  </button>
+                  <button
+                    onClick={() => props.onDelete(article.id)}
+                    className="font-medium text-red-600 dark:text-red-500 hover:underline"
+                  >
+                    Delete
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.dtos.stockexit.CreateStockExitDto;
 import com.example.demo.dtos.stockexit.UpdateStockExitDto;
@@ -77,5 +78,19 @@ public class StockExitService implements IStockExitService {
         article.setQuantity(newQuantity);
         articleRepository.save(article);
         return stockExitRepository.save(stockExit);
+    }
+
+    @Override
+    @Transactional
+    public void deleteStockExit(Long id) {
+        StockExit stockExit = stockExitRepository.findById(id).orElseThrow();
+        Article article = stockExit.getArticle();
+
+        // Increase article quantity by the stock exit quantity (restoring stock)
+        article.setQuantity(article.getQuantity() + stockExit.getQuantity());
+        articleRepository.save(article);
+
+        // Delete the stock exit
+        stockExitRepository.delete(stockExit);
     }
 }

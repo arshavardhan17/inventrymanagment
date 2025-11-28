@@ -32,3 +32,13 @@ export const CreateCategory = async (
     return null;
   }
 };
+
+export const DeleteCategory = async (id: number): Promise<boolean> => {
+  try {
+    await axios.delete(`${apiBase}/Api/Category/DeleteCategory/${id}`);
+    return true;
+  } catch (error) {
+    console.error("Error deleting category:", error);
+    return false;
+  }
+};

@@ -18,4 +18,6 @@ public interface IStockEntryService {
     List<StockEntry> getStockEntriesBySupplier(Long supplierId);
 
     List<StockEntry> getAllStockEntries();
+
+    void deleteStockEntry(Long id);
 }

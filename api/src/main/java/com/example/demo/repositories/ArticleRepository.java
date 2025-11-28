@@ -17,4 +17,6 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     long countByQuantityLessThanEqual(Integer quantity);
 
     List<Article> findByQuantityLessThanEqual(Integer quantity);
+
+    void deleteBySupplier(Supplier supplier);
 }

@@ -1,12 +1,22 @@
-import React from "react";
+import React, { useState } from "react";
 import { Category } from "../../helpers/declarations";
 import { truncateText } from "../../helpers/formatters";
+import { DeleteCategory } from "../../Services/CategoryService";
 
 interface Props {
   categories: Category[];
+  onCategoryDeleted?: (categoryId: number) => void;
 }
 
 const CategoryTable = (props: Props) => {
+  const handleDelete = async (categoryId: number) => {
+    if (window.confirm("Are you sure you want to delete this category?")) {
+      const success = await DeleteCategory(categoryId);
+      if (success && props.onCategoryDeleted) {
+        props.onCategoryDeleted(categoryId);
+      }
+    }
+  };
   return (
     <div>
       <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
@@ -19,9 +29,9 @@ const CategoryTable = (props: Props) => {
               <th scope="col" className="px-6 py-3">
                 Description
               </th>
-              {/* <th scope="col" className="px-6 py-3">
+              <th scope="col" className="px-6 py-3">
                 Action
-              </th> */}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -39,14 +49,14 @@ const CategoryTable = (props: Props) => {
                 <td className="px-6 py-4">
                   {truncateText(category.description, 100)}
                 </td>
-                {/* <td className="px-6 py-4">
-                  <a
-                    href="#"
-                    className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                <td className="px-6 py-4">
+                  <button
+                    onClick={() => handleDelete(category.id)}
+                    className="font-medium text-red-600 dark:text-red-500 hover:underline"
                   >
-                    Edit
-                  </a>
-                </td> */}
+                    Delete
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>

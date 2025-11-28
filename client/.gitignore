@@ -21,3 +21,4 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+@api   @client   add edit and deleat buttons for articles in my stock and suppliers if i deleate the supplier the supplier should be deleated an i sud be able to edit the details if i press edit button 

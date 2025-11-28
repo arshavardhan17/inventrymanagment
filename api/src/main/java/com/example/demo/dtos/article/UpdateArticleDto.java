@@ -8,7 +8,7 @@ public class UpdateArticleDto {
     private String description;
     private int quantity;
     private double price;
-    // private Long categoryId;
-    // private Long supplierId;
-    // private String barcode;
+    private Long categoryId;
+    private Long supplierId;
+    private String barcode;
 }

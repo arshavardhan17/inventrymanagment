@@ -21,16 +21,21 @@ const CategoryPage = (props: Props) => {
   const [categories, setCategorys] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const { isLoggedIn } = useAuth();
+
+  const handleCategoryDeleted = (categoryId: number) => {
+    setCategorys(categories.filter((cat) => cat.id !== categoryId));
+  };
+
   useEffect(() => {
     const GetAllCategorys = async () => {
       try {
-        setIsLoading(true); // Set loading to true before fetching
+        setIsLoading(true);
         const results = await AllCategorys();
         setCategorys(results);
       } catch (error) {
         console.error("Failed to fetch categories:", error);
       } finally {
-        setIsLoading(false); // Set loading to false after fetching
+        setIsLoading(false);
       }
     };
     GetAllCategorys();
@@ -70,7 +75,10 @@ const CategoryPage = (props: Props) => {
           {isLoading ? (
             <TableSkeleton isLoading={isLoading}></TableSkeleton>
           ) : (
-            <CategoryTable categories={categories}></CategoryTable>
+            <CategoryTable
+              categories={categories}
+              onCategoryDeleted={handleCategoryDeleted}
+            ></CategoryTable>
           )}
         </div>
       </div>

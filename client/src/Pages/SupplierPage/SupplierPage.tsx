@@ -6,8 +6,14 @@ import ErrorDialog from "../../Components/ErrorDialog/ErrorDialog";
 import AddSupplierModal, {
   AddSupplierDto,
 } from "../../Components/AddSupplierModal/AddSupplierModal";
+import EditSupplierModal from "../../Components/EditSupplierModal/EditSupplierModal";
 import TableSkeleton from "../../Components/TableSkeleton/TableSkeleton";
-import { CreateSupplier, AllSuppliers } from "../../Services/SupplierService";
+import {
+  CreateSupplier,
+  AllSuppliers,
+  UpdateSupplier,
+  DeleteSupplier,
+} from "../../Services/SupplierService";
 import { showErrorModal, showSuccessModal } from "../../helpers/handlers";
 import NavBar from "../../Components/NavBar/NavBar";
 import SideNav from "../../Components/SideNav/SideNav";
@@ -17,8 +23,11 @@ type Props = {};
 
 const SupplierPage = (props: Props) => {
   const [Suppliers, setSuppliers] = useState<Supplier[]>([]);
-
   const [isModalOpen, setModalOpen] = useState<boolean>(false);
+  const [isEditModalOpen, setEditModalOpen] = useState<boolean>(false);
+  const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(
+    null
+  );
   const [isLoading, setLoading] = useState<boolean>(true);
   const { isLoggedIn } = useAuth();
   const CloseModal = async (addSupplierDto?: AddSupplierDto) => {
@@ -26,9 +35,9 @@ const SupplierPage = (props: Props) => {
     if (addSupplierDto) {
       console.log(addSupplierDto);
       try {
-        const reponse = await CreateSupplier(addSupplierDto);
-        if (reponse) {
-          setSuppliers([...Suppliers, reponse]);
+        const response = await CreateSupplier(addSupplierDto);
+        if (response) {
+          setSuppliers([...Suppliers, response]);
           showSuccessModal();
         } else {
           showErrorModal();
@@ -36,7 +45,47 @@ const SupplierPage = (props: Props) => {
       } catch (error) {
         showErrorModal();
       }
-    } else {
+    }
+  };
+
+  const CloseEditModal = async (supplier?: Supplier) => {
+    setEditModalOpen(false);
+    if (supplier) {
+      try {
+        const response = await UpdateSupplier(supplier.id, supplier);
+        if (response) {
+          setSuppliers(
+            Suppliers.map((s) => (s.id === supplier.id ? response : s))
+          );
+          showSuccessModal();
+        } else {
+          showErrorModal();
+        }
+      } catch (error) {
+        showErrorModal();
+      }
+    }
+  };
+
+  const handleEdit = (supplier: Supplier) => {
+    setSelectedSupplier(supplier);
+    setEditModalOpen(true);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (window.confirm("Are you sure you want to delete this supplier?")) {
+      try {
+        const result = await DeleteSupplier(id);
+        if (result.success) {
+          setSuppliers(Suppliers.filter((s) => s.id !== id));
+          showSuccessModal();
+        } else {
+          alert(result.message || "Failed to delete supplier");
+          showErrorModal();
+        }
+      } catch (error) {
+        showErrorModal();
+      }
     }
   };
   useEffect(() => {
@@ -67,7 +116,11 @@ const SupplierPage = (props: Props) => {
         {isLoading ? (
           <TableSkeleton isLoading={isLoading}></TableSkeleton>
         ) : (
-          <SupplierTable Suppliers={Suppliers}></SupplierTable>
+          <SupplierTable
+            Suppliers={Suppliers}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          ></SupplierTable>
         )}
       </div>
       {isModalOpen && (
@@ -75,6 +128,13 @@ const SupplierPage = (props: Props) => {
           isOpen={isModalOpen}
           onClose={CloseModal}
         ></AddSupplierModal>
+      )}
+      {isEditModalOpen && (
+        <EditSupplierModal
+          isOpen={isEditModalOpen}
+          onClose={CloseEditModal}
+          supplier={selectedSupplier}
+        ></EditSupplierModal>
       )}
       {/* {showSuccess && <SuccessDialog onClose={() => setShowSuccess(false)} />}
       {showError && <ErrorDialog onClose={() => setShowError(false)} />} */}

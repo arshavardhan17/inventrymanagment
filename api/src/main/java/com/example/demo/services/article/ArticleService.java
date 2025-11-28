@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.dtos.article.CreateArticleDto;
 import com.example.demo.dtos.article.UpdateArticleDto;
@@ -25,8 +26,8 @@ public class ArticleService implements IArticleService {
     private final SupplierRepository supplierRepository;
 
     public ArticleService(SupplierRepository supplierRepository,
-                          ArticleRepository articleRepository,
-                          CategoryRepository categoryRepository) {
+            ArticleRepository articleRepository,
+            CategoryRepository categoryRepository) {
         this.articleRepository = articleRepository;
         this.categoryRepository = categoryRepository;
         this.supplierRepository = supplierRepository;
@@ -59,6 +60,20 @@ public class ArticleService implements IArticleService {
         article.setPrice(updateArticleDto.getPrice());
         article.setQuantity(updateArticleDto.getQuantity());
 
+        if (updateArticleDto.getCategoryId() != null) {
+            Category category = categoryRepository.findById(updateArticleDto.getCategoryId()).orElseThrow();
+            article.setCategory(category);
+        }
+
+        if (updateArticleDto.getSupplierId() != null) {
+            Supplier supplier = supplierRepository.findById(updateArticleDto.getSupplierId()).orElseThrow();
+            article.setSupplier(supplier);
+        }
+
+        if (updateArticleDto.getBarcode() != null) {
+            article.setBarcode(updateArticleDto.getBarcode());
+        }
+
         return articleRepository.save(article);
     }
 
@@ -77,5 +92,12 @@ public class ArticleService implements IArticleService {
     public List<Article> getAllArticlesBySupplier(Long id) {
         Supplier supplier = supplierRepository.findById(id).orElseThrow();
         return articleRepository.findBySupplier(supplier);
+    }
+
+    @Override
+    @Transactional
+    public void deleteArticle(Long id) {
+        Article article = articleRepository.findById(id).orElseThrow();
+        articleRepository.delete(article);
     }
 }

@@ -27,7 +27,39 @@ export const CreateArticle = async (
 
     return reponse.data;
   } catch (error) {
-    console.error("Error in getAllSuppliers:", error);
+    console.error("Error in getAllArticles:", error);
     return null;
+  }
+};
+
+export const UpdateArticle = async (
+  id: number,
+  updateArticleDto: any
+): Promise<Article | null> => {
+  try {
+    const response = await axios.put<any>(
+      `${apiBase}/Api/Article/UpdateArticle/${id}`,
+      updateArticleDto
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error in updateArticle:", error);
+    return null;
+  }
+};
+
+export const DeleteArticle = async (
+  id: number
+): Promise<{ success: boolean; message?: string }> => {
+  try {
+    await axios.delete(`${apiBase}/Api/Article/DeleteArticle/${id}`);
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error in deleteArticle:", error);
+    if (error.response?.data) {
+      return { success: false, message: error.response.data };
+    }
+    return { success: false, message: "Failed to delete article" };
   }
 };

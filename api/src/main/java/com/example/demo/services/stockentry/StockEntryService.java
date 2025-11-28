@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.dtos.stockentry.CreateStockEntryDto;
 import com.example.demo.dtos.stockentry.UpdateStockEntryDto;
@@ -24,8 +25,8 @@ public class StockEntryService implements IStockEntryService {
     private final SupplierRepository SupplierRepository;
 
     public StockEntryService(ArticleRepository articleRepository,
-                              StockEntryRepository stockEntryRepository,
-                              SupplierRepository SupplierRepository) {
+            StockEntryRepository stockEntryRepository,
+            SupplierRepository SupplierRepository) {
         this.articleRepository = articleRepository;
         this.stockEntryRepository = stockEntryRepository;
         this.SupplierRepository = SupplierRepository;
@@ -83,5 +84,19 @@ public class StockEntryService implements IStockEntryService {
     @Override
     public List<StockEntry> getAllStockEntries() {
         return stockEntryRepository.findAll();
+    }
+
+    @Override
+    @Transactional
+    public void deleteStockEntry(Long id) {
+        StockEntry stockEntry = stockEntryRepository.findById(id).orElseThrow();
+        Article article = stockEntry.getArticle();
+
+        // Decrease article quantity by the stock entry quantity
+        article.setQuantity(article.getQuantity() - stockEntry.getQuantity());
+        articleRepository.save(article);
+
+        // Delete the stock entry
+        stockEntryRepository.delete(stockEntry);
     }
 }

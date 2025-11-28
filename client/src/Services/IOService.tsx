@@ -10,14 +10,14 @@ export const GetAllIOStock = async (): Promise<IOStock[]> => {
     const exits = await axios.get<any>(
       `${apiBase}/Api/StockExit/GetAllStockExit`
     );
-    console.log("exits",exits);
+    console.log("exits", exits);
     const entrys = await axios.get<any>(
       `${apiBase}/Api/StockEntry/GetAllStockEntries`
     );
-    console.log("entry",entrys);
-    
+    console.log("entry", entrys);
+
     const results: IOStock[] = IOMapper(entrys.data, exits.data);
-    console.log(results)
+    console.log(results);
     return results;
   } catch (error) {
     console.error("Error in GetAllIOStock:", error);
@@ -53,5 +53,35 @@ export const CreateStockExit = async (
   } catch (error) {
     console.error("Error in getOutputProgress:", error);
     return null;
+  }
+};
+
+export const DeleteStockEntry = async (
+  id: number
+): Promise<{ success: boolean; message?: string }> => {
+  try {
+    await axios.delete(`${apiBase}/Api/StockEntry/DeleteStockEntry/${id}`);
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error in deleteStockEntry:", error);
+    if (error.response?.data) {
+      return { success: false, message: error.response.data };
+    }
+    return { success: false, message: "Failed to delete stock entry" };
+  }
+};
+
+export const DeleteStockExit = async (
+  id: number
+): Promise<{ success: boolean; message?: string }> => {
+  try {
+    await axios.delete(`${apiBase}/Api/StockExit/DeleteStockExit/${id}`);
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error in deleteStockExit:", error);
+    if (error.response?.data) {
+      return { success: false, message: error.response.data };
+    }
+    return { success: false, message: "Failed to delete stock exit" };
   }
 };
