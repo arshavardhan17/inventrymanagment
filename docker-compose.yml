@@ -23,6 +23,7 @@ services:
 
   # Backend API
   backend:
+    image: arshavardhan/inventory-manager-backend:latest
     build:
       context: .
       dockerfile: Dockerfile.backend
@@ -47,6 +48,7 @@ services:
 
   # Frontend Application
   frontend:
+    image: arshavardhan/inventory-manager-frontend:latest
     build:
       context: .
       dockerfile: Dockerfile.frontend
